@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Malla Curricular - Ingeniería Civil</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fdfdfd;
+      margin: 0;
+      padding: 1rem;
+      color: #333;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #a10249;
+    }
+    .ciclo {
+      border: 2px solid #a10249;
+      border-radius: 8px;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #f4b9cc;
+    }
+    .materia {
+      background: #fff;
+      border-left: 6px solid #cf2d54;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border-radius: 5px;
+      position: relative;
+      transition: 0.3s ease;
+      cursor: pointer;
+    }
+    .materia.aprobada {
+      background: #df7c9b;
+      text-decoration: line-through;
+    }
+    .materia.bloqueada {
+      background: #e0e0e0;
+      border-left-color: #999;
+      color: #999;
+      cursor: not-allowed;
+    }
+    .materia .tooltip {
+      visibility: hidden;
+      background-color: #871b38;
+      color: #fff;
+      text-align: center;
+      border-radius: 5px;
+      padding: 0.5rem;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -60px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      width: 120px;
+      font-size: 0.8rem;
+    }
+    .materia:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Curricular</h1>
+  <h2>Ingeniería Civil</h2>
+  <div id="malla"></div>
+
+  <script>
+    const materias = [
+      { codigo: "EG-", nombre: "Curso de Arte", creditos: 2, requisitos: [], ciclo: "I" },
+      { codigo: "EG0124", nombre: "Curso Integrado de Humanidades I", creditos: 6, requisitos: [], ciclo: "I" },
+      { codigo: "IC0101", nombre: "Taller de Introducción a la Ingeniería", creditos: 3, requisitos: ["MA0001"], ciclo: "I" },
+      { codigo: "MA0001", nombre: "Precálculo", creditos: 0, requisitos: [], ciclo: "I" },
+      { codigo: "MA1001", nombre: "Cálculo I", creditos: 3, requisitos: ["MA0001"], ciclo: "I" },
+      { codigo: "RP-1", nombre: "Repertorio", creditos: 3, requisitos: [], ciclo: "I" },
+      { codigo: "EF-", nombre: "Actividad Deportiva", creditos: 0, requisitos: [], ciclo: "II" },
+      { codigo: "EG0125", nombre: "Curso Integrado de Humanidades II", creditos: 6, requisitos: ["EG0124"], ciclo: "II" },
+      { codigo: "FS0219", nombre: "Física General I", creditos: 3, requisitos: ["MA1001"], correquisitos: ["FS0211"], ciclo: "II" },
+      { codigo: "FS0211", nombre: "Laboratorio de Física General I", creditos: 1, requisitos: ["MA1001"], correquisitos: ["FS0219"], ciclo: "II" },
+      { codigo: "MA1002", nombre: "Cálculo II", creditos: 4, requisitos: ["MA1001"], ciclo: "II" },
+      { codigo: "QU0114", nombre: "Química General Intensiva", creditos: 4, requisitos: [], correquisitos: ["QU0115"], ciclo: "II" },
+      { codigo: "QU0115", nombre: "Laboratorio de Química General Intensiva", creditos: 1, requisitos: [], correquisitos: ["QU0114"], ciclo: "II" },
+      { codigo: "CI0202", nombre: "Principios de Informática", creditos: 4, requisitos: ["MA1002"], ciclo: "III" },
+      { codigo: "FS0310", nombre: "Física General II", creditos: 3, requisitos: ["FS0211", "FS0219", "MA1002"], correquisitos: ["FS0311"], ciclo: "III" },
+      { codigo: "FS0311", nombre: "Laboratorio de Física General II", creditos: 1, requisitos: ["FS0211", "FS0219", "MA1002"], correquisitos: ["FS0310"], ciclo: "III" },
+      { codigo: "IC0302", nombre: "Diseño Gráfico", creditos: 3, requisitos: ["FS0211", "FS0219", "IC0101", "MA1002"], ciclo: "III" },
+      { codigo: "MA1003", nombre: "Cálculo III", creditos: 4, requisitos: ["MA1002"], correquisitos: ["MA1004"], ciclo: "III" },
+      { codigo: "MA1004", nombre: "Álgebra Lineal", creditos: 3, requisitos: [], ciclo: "III" },
+      { codigo: "FS0410", nombre: "Física General III", creditos: 3, requisitos: ["FS0310", "FS0311", "MA1003"], correquisitos: ["FS0411"], ciclo: "IV" },
+      { codigo: "FS0411", nombre: "Laboratorio de Física General III", creditos: 1, requisitos: ["FS0310", "FS0311", "MA1004"], correquisitos: ["FS0410"], ciclo: "IV" },
+      { codigo: "IC0401", nombre: "Estática", creditos: 4, requisitos: ["FS0310", "FS0311", "IC0302", "MA1003"], ciclo: "IV" },
+      { codigo: "IC0403", nombre: "Comunicación Técnica", creditos: 3, requisitos: ["EG0125", "IC0302"], ciclo: "IV" },
+      { codigo: "IC0410", nombre: "Seminario de Ética, Ingeniería y Sociedad", creditos: 1, requisitos: ["EG0125", "IC0302"], correquisitos: ["IC0403"], ciclo: "IV" },
+      { codigo: "IT0001", nombre: "Fundamentos de Ingeniería Topográfica", creditos: 3, requisitos: ["FS0310", "FS0311", "IC0302"], ciclo: "IV" },
+      { codigo: "MA1005", nombre: "Ecuaciones Diferenciales", creditos: 4, requisitos: ["MA1002", "MA1004"], ciclo: "IV" },
+      { codigo: "IC0502", nombre: "Dinámica", creditos: 3, requisitos: ["FS0410", "FS0411", "IC0401", "MA1005"], ciclo: "V" },
+      { codigo: "IC0510", nombre: "Mecánica del Sólido I", creditos: 4, requisitos: ["IC0401", "MA1005", "QU0114", "QU0115"], ciclo: "V" },
+      { codigo: "IC0516", nombre: "Probabilidad y Estadística Aplicada a la Ingeniería", creditos: 3, requisitos: ["CI0202", "MA1005"], ciclo: "V" },
+      { codigo: "MA1006", nombre: "Introducción al Análisis Numérico", creditos: 4, requisitos: ["CI0202", "MA1005"], ciclo: "V" },
+      { codigo: "XE0156", nombre: "Introducción a la Economía", creditos: 4, requisitos: [], ciclo: "V" },
+      { codigo: "IC0604", nombre: "Materiales de Construcción", creditos: 3, requisitos: ["IC0510", "IC0516"], ciclo: "VI" },
+      { codigo: "IC0605", nombre: "Mecánica de Fluidos", creditos: 3, requisitos: ["IC0502", "IC0510", "IC0516", "MA1006"], ciclo: "VI" },
+      { codigo: "IC0607", nombre: "Taller de Sistemas de Ingeniería", creditos: 4, requisitos: ["IC0403", "IC0410", "IC0502", "IC0510", "IC0516", "MA1006"], correquisitos: ["IC0811"], ciclo: "VI" },
+      { codigo: "IC0610", nombre: "Mecánica del Sólido II", creditos: 3, requisitos: ["IC0510"], ciclo: "VI" },
+      { codigo: "IC0811", nombre: "Administración en Ingeniería", creditos: 3, requisitos: ["IC0516", "XE0156"], ciclo: "VI" },
+      { codigo: "SR-I", nombre: "Seminario de Realidad Nacional I", creditos: 2, requisitos: ["EG0124", "EG0125"], ciclo: "VI" },
+      { codigo: "IC0701", nombre: "Análisis Estructural", creditos: 3, requisitos: ["IC0610"], ciclo: "VII" },
+      { codigo: "IC0703", nombre: "Mecánica de Suelos", creditos: 4, requisitos: ["IC0604", "IC0605", "IC0610"], ciclo: "VII" },
+      { codigo: "IC0704", nombre: "Métodos Constructivos I", creditos: 3, requisitos: ["IC0604", "IT0001"], ciclo: "VII" },
+      { codigo: "IC0709", nombre: "Hidráulica General", creditos: 3, requisitos: ["IC0605"], ciclo: "VII" },
+      { codigo: "IC0711", nombre: "Transportes", creditos: 3, requisitos: ["IC0607"], ciclo: "VII" },
+      { codigo: "IC0712", nombre: "Fundamentos de Ingeniería Ambiental", creditos: 3, requisitos: ["IC0605"], ciclo: "VII" },
+      { codigo: "IC0801", nombre: "Concreto Reforzado", creditos: 3, requisitos: ["IC0604", "IC0701"], ciclo: "VIII" },
+      { codigo: "IC0804", nombre: "Programación y Presupuestación de Obra", creditos: 3, requisitos: ["IC0704", "IC0811"], ciclo: "VIII" },
+      { codigo: "IC0808", nombre: "Hidrología", creditos: 3, requisitos: ["IC0709", "IC0712", "IT0001"], ciclo: "VIII" },
+      { codigo: "IC0809", nombre: "Ingeniería Geotécnica", creditos: 3, requisitos: ["IC0703"], ciclo: "VIII" },
+      { codigo: "IC0810", nombre: "Diseño Vial", creditos: 3, requisitos: ["IC0703", "IC0711", "IT0001"], ciclo: "VIII" },
+      { codigo: "IC1006", nombre: "Análisis de Impacto Ambiental", creditos: 3, requisitos: ["IC0712"], ciclo: "VIII" },
+      { codigo: "IC0905", nombre: "Taller de Diseño", creditos: 4, requisitos: ["IC0801", "IC0804", "IC0808", "IC0809", "IC0810", "IC1006"], ciclo: "IX" },
+      { codigo: "OPT1119", nombre: "Optativos de Ingeniería Civil", creditos: 9, requisitos: [], ciclo: "IX" },
+      { codigo: "SR-II", nombre: "Seminario de Realidad Nacional II", creditos: 2, requisitos: ["EG0124", "EG0125", "SR-I"], ciclo: "IX" },
+      { codigo: "OPT1119", nombre: "Optativos de Ingeniería Civil", creditos: 12, requisitos: [], ciclo: "X" },
+      { codigo: "OPT1123", nombre: "Bloque 0", creditos: 0, requisitos: [], ciclo: "X" },
+      { codigo: "OPT1193", nombre: "Bloque TFG", creditos: 0, requisitos: [], ciclo: "XI" }
+    ];
+
+    const estado = JSON.parse(localStorage.getItem("progreso-civil") || "{}");
+
+    function estaAprobada(codigo) {
+      return estado[codigo];
+    }
+
+    function requisitosCumplidos(m) {
+      return (m.requisitos || []).every(req => estaAprobada(req));
+    }
+
+    function crearMateria(m) {
+      const div = document.createElement("div");
+      div.className = "materia";
+      div.id = m.codigo;
+      div.textContent = `${m.codigo} - ${m.nombre} (${m.creditos} créditos)`;
+
+      if (estaAprobada(m.codigo)) {
+        div.classList.add("aprobada");
+      } else if (!requisitosCumplidos(m)) {
+        div.classList.add("bloqueada");
+        const faltantes = (m.requisitos || []).filter(req => !estaAprobada(req));
+        const tooltip = document.createElement("div");
+        tooltip.className = "tooltip";
+        tooltip.textContent = "Falta: " + faltantes.join(", ");
+        div.appendChild(tooltip);
+      }
+
+      div.onclick = () => {
+        if (div.classList.contains("bloqueada")) return;
+        div.classList.toggle("aprobada");
+        estado[m.codigo] = div.classList.contains("aprobada");
+        localStorage.setItem("progreso-civil", JSON.stringify(estado));
+        location.reload(); // Para actualizar dependencias
+      };
+      return div;
+    }
+
+    function renderMalla() {
+      const contenedor = document.getElementById("malla");
+      const ciclos = [...new Set(materias.map(m => m.ciclo))];
+      ciclos.forEach(ciclo => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "ciclo";
+        const titulo = document.createElement("h3");
+        titulo.textContent = `Ciclo ${ciclo}`;
+        wrapper.appendChild(titulo);
+
+        materias.filter(m => m.ciclo === ciclo).forEach(m => {
+          wrapper.appendChild(crearMateria(m));
+        });
+
+        contenedor.appendChild(wrapper);
+      });
+    }
+
+    renderMalla();
+  </script>
+</body>
+</html>
